@@ -3,7 +3,7 @@ import json
 import re
 import requests
 import pandas as pd
-df= pd.read_csv(r'C:\scrapy\officedepot\project\project\spiders\officedepot.csv')
+# df= pd.read_csv(r'C:\scrapy\officedepot\project\project\spiders\officedepot.csv')
 df= df['Links'].tolist()
 df =df[6445:]
 

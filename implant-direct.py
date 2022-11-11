@@ -1,5 +1,4 @@
-from pydoc import describe
-from urllib import request
+from bs4 import BeautifulSoup 
 import scrapy 
 from scrapy.crawler import CrawlerProcess
 import pandas as pd
@@ -56,6 +55,8 @@ class implant_direct_scraper(scrapy.Spider):
         descrip1= ''.join(str(stri) for stri in descrip1)
         descrip2 = response.xpath("//div[@class='product attribute description']//p//text()").extract() 
         descrip3=response.xpath("//div[@class='product attribute description']//div//text()").extract_first()
+        soup = BeautifulSoup(descrip3, 'lxml')
+        descrip3 =soup.text
        
         descrip2= ''.join(str(stri) for stri in descrip2)
         descrip3= response.xpath("//div[@class='product attribute description']//ul//text()").extract()
