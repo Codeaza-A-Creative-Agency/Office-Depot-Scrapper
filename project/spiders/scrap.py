@@ -4,8 +4,8 @@ import re
 import requests
 import pandas as pd
 # df= pd.read_csv(r'C:\scrapy\officedepot\project\project\spiders\officedepot.csv')
-df= df['Links'].tolist()
-df =df[6445:]
+# df= df['Links'].tolist()
+# df =df[6445:]
 
 class ScrapSpider(scrapy.Spider):
     name = 'scrap'
