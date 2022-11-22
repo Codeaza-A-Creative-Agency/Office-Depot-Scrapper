@@ -9,7 +9,7 @@ class acradiocom_scraper(scrapy.Spider):
         'RETRY_TIMES': 10,
         # export as CSV format
         'FEED_FORMAT' : 'csv',
-        'FEED_URI' : 'acradiocom.com-sample-data.csv'
+        'FEED_URI' : 'acradiocom.com-data.csv'
     #     "ROTATING_PROXY_LIST" : ["108.59.14.208:13040", "108.59.14.203:13040"],
     #             "DOWNLOADER_MIDDLEWARES" : {
     #             "rotating_proxies.middlewares.RotatingProxyMiddleware" : 610,
@@ -57,10 +57,15 @@ class acradiocom_scraper(scrapy.Spider):
         desc3 = response.css("div#content_description>div ::text").extract()
         desc3 = ''.join(desc3)
         desc= desc+ desc1 +desc2 +desc3
-        sku = response.css("span.ty-control-group__item::text").extract_first()
-        if "In stock" or "On backorder" in sku:
-            sku= response.css("h1.ty-product-block-title>bdi::text").extract_first()
-        
+        att_url =response.xpath("//p[contains(text(),'For detailed warranty ')]/a/@href").extract()
+        att_url = ['https://acradiocom.com'+url for url in att_url]
+        sku = response.css("span.ty-control-group__item::text").extract_first().strip()
+        if sku == "In stock":
+            sku =response.css("h1.ty-product-block-title>bdi::text").extract_first()
+        elif sku == 'On backorder':
+            sku =response.css("h1.ty-product-block-title>bdi::text").extract_first()
+        else:
+            sku= sku
         data_dict={}
         
         data_dict['Seller Platform']= 'AC Radio'
@@ -70,11 +75,11 @@ class acradiocom_scraper(scrapy.Spider):
         data_dict['Product Title']= response.css("h1.ty-product-block-title>bdi::text").extract_first()
         data_dict['Description']= desc
         data_dict['Packaging']=''
-        data_dict['Qty']=''
+        data_dict['Qty']=response.css("input.ty-value-changer__input::attr(value)").extract_first()
         data_dict['Category']= response.xpath("(//a[@class='ty-breadcrumbs__a']/text())[3]").extract_first()
         data_dict['Subcategories']=''
         data_dict['Product Page URL']= response.url
-        data_dict['Attachements']= response.xpath("//p[contains(text(),'For detailed warranty ')]/a/@href").extract()
+        data_dict['Attachements']= att_url
         data_dict['Image URL']=response.css("img.ty-pict::attr(src)").extract()
         yield data_dict
         

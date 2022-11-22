@@ -9,7 +9,7 @@ class ADS_scraper(scrapy.Spider):
         'RETRY_TIMES': 10,
         # export as CSV format
         'FEED_FORMAT' : 'csv',
-        'FEED_URI' : 'testing.csv'
+        'FEED_URI' : 'ADS-dental-data.csv'
     #     "ROTATING_PROXY_LIST" : ["108.59.14.208:13040", "108.59.14.203:13040"],
     #             "DOWNLOADER_MIDDLEWARES" : {
     #             "rotating_proxies.middlewares.RotatingProxyMiddleware" : 610,
@@ -46,13 +46,18 @@ class ADS_scraper(scrapy.Spider):
             
             
         if image2 !=None:
-            image = image + baseurl+image2
+            image = baseurl+image +","+ baseurl+image2
         src2 =response.xpath("//script[contains(text(),'ListItem')]/text()").extract_first()
         data2= json.loads(src2)
         cat = data2['itemListElement'][2]['item']['name']
         
         descrip = response.css("div.detail_text_group ::text").extract()
         descrip= ''.join(descrip)
+        clean = lambda dirty: dirty.replace("  ",'')
+        descrip = str(descrip)
+        descrip = clean(descrip)
+        descrip2 =str(descrip2)
+        descrip2 = clean(descrip2)
         descrip = descrip+descrip2
         sku = response.xpath("//tr[@class='firstRow']/td/text()").extract()
         sku= ''.join(sku)
