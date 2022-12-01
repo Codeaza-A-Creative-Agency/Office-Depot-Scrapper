@@ -9,7 +9,7 @@ class supply_clinic_scraper(scrapy.Spider):
         'RETRY_TIMES': 10,
         # export as CSV format
         'FEED_FORMAT' : 'csv',
-        # 'FEED_URI' : 'testing.csv'
+        'FEED_URI' : 'supplyclinic-sample-data.csv'
     #     "ROTATING_PROXY_LIST" : ["108.59.14.208:13040", "108.59.14.203:13040"],
     #             "DOWNLOADER_MIDDLEWARES" : {
     #             "rotating_proxies.middlewares.RotatingProxyMiddleware" : 610,
@@ -54,21 +54,18 @@ class supply_clinic_scraper(scrapy.Spider):
         desc = response.css("div.col-sm-8,col-md-5 ::text").extract_first()
         bs = BeautifulSoup(desc, 'html.parser')
         desc=bs.get_text()
-        
-        # qty = response.xpath('//*[@id="item-page"]/div[2]/div[2]/div[2]/div/table/tbody/tr[5]/td[2]/text()').extract_first().split("/")[0]
-        # pkg = response.xpath('//*[@id="item-page"]/div[2]/div[2]/div[2]/div/table/tbody/tr[5]/td[2]/text()').extract_first().split("/")[1]
         try:
-            try:
-                qty =  response.css("table.details-table tr:nth-child(5) td:nth-child(2)::text").extract_first().split("/")[0]
-                pkg=response.css("table.details-table tr:nth-child(5) td:nth-child(2)::text").extract_first().split("/")[1]
-            except:
-                qty =response.css("table.details-table tr:nth-child(4) td:nth-child(2)::text").extract_first().split("/")[0]
-                pkg=response.css("table.details-table tr:nth-child(4) td:nth-child(2)::text").extract_first().split("/")[1]
+            qty =  response.css("table.details-table tr:nth-child(5) td:nth-child(2)::text").extract_first().split("/")[0]
+            pkg=response.css("table.details-table tr:nth-child(5) td:nth-child(2)::text").extract_first().split("/")[1]
+            
                 
-        except:
-            qty = None
-            pkg = None
-       
+                
+                
+        except Exception as e:
+            qty =response.css("table.details-table tr:nth-child(4) td:nth-child(2)::text").extract_first().split("/")[0]
+            pkg=response.css("table.details-table tr:nth-child(4) td:nth-child(2)::text").extract_first().split("/")[1]
+            print(e)
+            pass
         data_dict={}
         data_dict['Seller Platform']= 'Supply Clinic'
         data_dict['Seller SKu']= response.css("div.manu-code::text").extract_first().split(":")[1].strip()
