@@ -73,16 +73,17 @@ class dental_city_scraper(scrapy.Spider):
             desc = ''.join(desc)
             desc = re.sub(r"\s+"," ",desc)
         try:
-            qty =response.xpath("//input[@id='qty']@value").get()
-            pkf =response.css("div.short-description>dl:last-child ::text").getall()[-4].split(' ')[1]
+            qty=response.css(".short-description>.product-attributes>dd:nth-child(8)::text").get()
+            qty =re.findall(r'\d+',qty)
+            qty = ''.join(qty)
         except:
-            qty =None
-            pkg=None
-        
+            pass
+   
         mfg= response.css("td.product-main-table-info>dl.product-attributes dd.main::text").get()
         if mfg is None:
             mfg =response.css(".product-main-table-info-mfg>strong ::text").get()
-    
+       
+        
         data_dict={}
         
         data_dict['Seller Platform']= "MW Dental"
@@ -91,7 +92,7 @@ class dental_city_scraper(scrapy.Spider):
         data_dict['Manufacture Code']= mfg_code
         data_dict['Product Title']=response.css("h3.product-name::text").extract_first()
         data_dict['Description']= desc
-        data_dict['Packaging']=pkg
+        data_dict['Packaging']=response.css(".short-description>.product-attributes>dd:nth-child(6)::text").get()
         data_dict['Quantity']=qty
         data_dict['Category']= response.css('.breadcrumbs li:nth-child(3)>a::text').get()
         data_dict['Sub Category']=''
