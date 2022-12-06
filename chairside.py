@@ -38,14 +38,48 @@ class chairside_scraper(scrapy.Spider):
         desc = ''.join(desc)
         desc= desc.strip()
         data_dict={}
-        
-        for i in data:
-    
+        sel1 =response.css("select[aria-label='Select Option']>option")[1:]
+        sel2 =response.css("select[aria-label='Select Shade']>option")[1:]
+        check = response.css("select[aria-label='Select Options']>option:first-child::text").extract_first()
+        check2 = response.css("select[aria-label='Select Shade']>option:first-child::text").extract_first()
+        if check == "Select Options":            
+            for i,b in zip(sel1,data):
+                data_dict['Seller Platform']= "Chairside Solutions"
+                data_dict['Seller SKU']= b['sku']
+                data_dict['Manufacture Name']= 'Chairside Solutions'
+                data_dict['Manufacture Code']= ''
+                data_dict['Product Title']= i.css("::text").extract_first().strip()
+                data_dict['Description']= desc
+                data_dict['Packaging']=''
+                data_dict['Quantity']= response.xpath("//input[@aria-label='Quantity']/@value").extract_first()
+                data_dict['Category']=''
+                data_dict['Sub Category']=''
+                data_dict['Product URL']=response.url
+                data_dict['Attachements']=''
+                data_dict['Image URL']=response.css("img.ProductItem-gallery-slides-item-image::attr(data-src)").extract()
+                yield data_dict
+        elif check2 == 'Select Shade':
+            for i,b in zip(sel2,data):
+                data_dict['Seller Platform']= "Chairside Solutions"
+                data_dict['Seller SKU']= b['sku']
+                data_dict['Manufacture Name']= 'Chairside Solutions'
+                data_dict['Manufacture Code']= ''
+                data_dict['Product Title']= response.css(".ProductItem-details-title::text").get().strip()+"-Shade-"+i.css("::text").extract_first().strip()
+                data_dict['Description']= desc
+                data_dict['Packaging']=''
+                data_dict['Quantity']= response.xpath("//input[@aria-label='Quantity']/@value").extract_first()
+                data_dict['Category']=''
+                data_dict['Sub Category']=''
+                data_dict['Product URL']=response.url
+                data_dict['Attachements']=''
+                data_dict['Image URL']=response.css("img.ProductItem-gallery-slides-item-image::attr(data-src)").extract()
+                yield data_dict
+        else:
             data_dict['Seller Platform']= "Chairside Solutions"
-            data_dict['Seller SKU']= i['sku']
+            data_dict['Seller SKU']= data[0]['sku']
             data_dict['Manufacture Name']= 'Chairside Solutions'
-            data_dict['Manufacture Code']= ''
-            data_dict['Product Title']= response.css("h1.ProductItem-details-title::text").extract_first().strip()
+            data_dict['Manufacture Code']=''# data['product']['variants'][0]
+            data_dict['Product Title']= response.css(".ProductItem-details-title::text").get().strip()
             data_dict['Description']= desc
             data_dict['Packaging']=''
             data_dict['Quantity']= response.xpath("//input[@aria-label='Quantity']/@value").extract_first()
@@ -55,27 +89,6 @@ class chairside_scraper(scrapy.Spider):
             data_dict['Attachements']=''
             data_dict['Image URL']=response.css("img.ProductItem-gallery-slides-item-image::attr(data-src)").extract()
             yield data_dict
-    
-        # check = response.css("select[aria-label='Select Options']>option:first-child::text").extract_first()
-        # if check == "Select Options":
-        #     print("under check")
-            
-        #     for i in response.css("select[aria-label='Select Options']>option"):
-        #         data_dict['Seller Platform']= "Chairside Solutions"
-        #         data_dict['Seller SKU']= response.css("h1.ProductItem-details-title::text").extract_first().strip()
-        #         data_dict['Manufacture Name']= 'Chairside Solutions'
-        #         data_dict['Manufacture Code']= ''
-        #         data_dict['Product Title']= i.css("::text").extract_first().strip()
-        #         data_dict['Description']= desc
-        #         data_dict['Packaging']=''
-        #         data_dict['Quantity']= response.xpath("//input[@aria-label='Quantity']/@value").extract_first()
-        #         data_dict['Category']=''
-        #         data_dict['Sub Category']=''
-        #         data_dict['Product URL']=response.url
-        #         data_dict['Attachements']=''
-        #         data_dict['Image URL']=response.css("img.ProductItem-gallery-slides-item-image::attr(data-src)").extract()
-        #         yield data_dict
-        # else:
    
         
       

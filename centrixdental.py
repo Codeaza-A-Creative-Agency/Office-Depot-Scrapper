@@ -1,0 +1,79 @@
+import scrapy 
+from scrapy.crawler import CrawlerProcess
+
+import json
+class centrixdental_scraper(scrapy.Spider):
+    
+    custom_settings = {
+        'DOWNLOAD_DELAY' : 0.25,
+        'RETRY_TIMES': 10,
+        # export as CSV format
+        'FEED_FORMAT' : 'csv',
+        'ROBOTSTXT_OBEY':False
+        # 'FEED_URI' : 'testing.csv'
+    #     "ROTATING_PROXY_LIST" : ["108.59.14.208:13040", "108.59.14.203:13040"],
+    #             "DOWNLOADER_MIDDLEWARES" : {
+    #             "rotating_proxies.middlewares.RotatingProxyMiddleware" : 610,
+    #             "rotating_proxies.middlewares.BanDetectionMiddleware" : 620}
+    }
+     
+    name= 'scraper'
+    headers =  {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.84 Safari/537.36',
+            'Accept': 'application/json,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, sdch',
+            'Accept-Language': 'en-US,en;q=0.8,zh-CN;q=0.6,zh;q=0.4',
+        }
+    def start_requests(self):
+        url= 'https://www.centrixdental.com'
+     
+        yield scrapy.Request(url=url, headers=self.headers, callback=self.parse)
+    def parse(self, response):
+        links =response.css("li.item a::attr(href)").getall()
+        
+        
+        for link in links:
+            yield scrapy.Request(url=link, headers=self.headers, callback=self.parse_p_links)
+    def parse_p_links(self,response):
+        links = response.css('.product-item-link::attr(href)').getall()
+        for link in links:
+            yield scrapy.Request(url=link, headers=self.headers, callback=self.parse_product)
+   
+        
+        next_page =response.css(".next::attr(href)").extract_first()
+        
+        if next_page is not None:
+            yield response.follow(url=next_page, headers=self.headers, callback=self.parse_p_links)
+    def parse_product(self,response):
+        desc =response.css(".description>.value ::text").getall()
+        desc = ''.join(desc)
+        desc = desc.replace("\r\n",'')
+        sc=response.xpath("//script[contains(text(),'data-gallery-role=gallery-placeholde')]/text()").get()
+        data= json.loads(sc)
+        images =[]
+        imgs =data['[data-gallery-role=gallery-placeholder]']['mage/gallery/gallery']['data']
+        for img in imgs:
+            images.append(img['img'])
+        
+        
+        data_dict= {}
+        data_dict['Seller Platform']= 'Centrixdental'
+        data_dict['Seller SKU']= response.css("div[itemprop='sku']::text").get()
+        data_dict['Manufacture Name']= 'Centrixdental'
+        data_dict['Manufacture Code']=''
+        data_dict['Product Title']=response.css(".base::text").get().strip()
+        data_dict['Description']=desc
+        data_dict['Packaging']=''
+        data_dict['Qty']=response.css("input[name='qty']::attr(value)").get()
+        data_dict['Category']=response.css("li.category4>a ::text").get().strip()
+        data_dict['Subcategory']=''
+        data_dict['Product Page URL']= response.url
+        data_dict['Attachment URL']=response.css("a[title='Download Product Literature']::attr(href)").get()
+        data_dict['Image URL']=images
+    
+    
+
+
+process = CrawlerProcess()
+process.crawl(centrixdental_scraper)
+process.start()

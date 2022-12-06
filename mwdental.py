@@ -48,19 +48,12 @@ class dental_city_scraper(scrapy.Spider):
         except:
             mfg_code= None
         
-        img =response.css("ul#zoom_additionalimages>li a::attr(href)").get()
-
-        img2 =response.css("ul#zoom_additionalimages>li img::attr(src)").get()
-        if img2 is None:
-            img2 = ''
-    
-        elif img is None:  
-            img = ''
-        else:
-            pass
+        img =response.css("ul#zoom_additionalimages a::attr(href)").getall()
+        if img is None:
+            img=''
+ 
      
             
-            img = [img +','+ img2]
         desc = response.css("div.short-description ::text").getall()
         desc = ''.join(desc)
         desc = re.sub(r"\s+"," ",desc)

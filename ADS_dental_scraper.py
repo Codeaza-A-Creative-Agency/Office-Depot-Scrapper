@@ -68,12 +68,12 @@ class ADS_scraper(scrapy.Spider):
         data_dict['Manufacture Code']=response.xpath("//tr[@class='firstRow']/td/text()").extract()
         data_dict['Product Title']= response.css('h1.inner_title ::text').extract_first()
         data_dict['Description']= descrip
-        data_dict['Qty']=''
         data_dict['Packaging']=''
+        data_dict['Qty']=''
         data_dict['Category']= cat
         data_dict['Subcategory']=''
         data_dict['Product Page URL']=response.url
-        data_dict['Attachments']= baseurl+response.xpath("(//div[@class='mp_bottom_up_item_href_group flex']/a/@href)[18]").extract_first()
+        data_dict['Attachment URL']= baseurl+response.xpath("(//div[@class='mp_bottom_up_item_href_group flex']/a/@href)[18]").extract_first()
         data_dict['Image URL']=  image
         yield data_dict
    
